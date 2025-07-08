@@ -107,9 +107,9 @@ def build_qtg_mixer(
 
     #   b) Multi‑controlled phase cuando TODAS están en |1>
     if num_state_qubits == 1:
-        mixer.rz(2 * beta, state_ids.start)  # type: ignore[attr-defined]
+        mixer.rz(-2 * beta, state_ids.start)  # type: ignore[attr-defined]
     else:
-        mcphase = MCPhaseGate(2 * beta, num_state_qubits - 1)
+        mcphase = MCPhaseGate(-beta, num_state_qubits - 1)
         mixer.append(mcphase, list(state_ids))
 
     #   c) Deshacer las X

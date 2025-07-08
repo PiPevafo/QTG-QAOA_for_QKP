@@ -52,8 +52,8 @@ Copyright 2025 - released under the MIT Licence.
 def biased_hadamard(y_bit: int, b: float) -> UnitaryGate:
     """Return the 1-qubit biased-Hadamard gate H_b^{(y)} defined in Eq.(17).
 
-    H_b^{(0)} = 1/√(b+2) * [[√(1+b), 1], [1, √(1+b)]]
-    H_b^{(1)} = 1/√(b+2) * [[1, √(1+b)], [√(1+b), 1]]
+    H_b^{(0)} = 1/√(b+2) * [[√(1+b), 1], [1, -√(1+b)]]
+    H_b^{(1)} = 1/√(b+2) * [[1, √(1+b)], [√(1+b), -1]]
     """
     if b < 0:
         raise ValueError("Bias b must be non-negative.")
@@ -84,20 +84,20 @@ class QTG(BlueprintCircuit):
 
     def __init__(
         self,
+        capacity: Optional[int] = None,
         num_state_qubits: Optional[int] = None,
         weights: Optional[List[int]] = None,
-        capacity: Optional[int] = None,
         y_ansatz: Optional[List[int]] = None,
         biased: float = 0.0,
         name: str = "QTG",
     ) -> None:
         super().__init__(name=name)
+        self._capacity: Optional[int] = None
         self._weights: Optional[List[int]] = None
         self._num_state_qubits: Optional[int] = None
-        self._capacity: Optional[int] = None
+        self.capacity = capacity
         self.weights = weights
         self.num_state_qubits = num_state_qubits
-        self.capacity = capacity
         self.biased = biased
         if y_ansatz is not None:
             self.y_ansatz = y_ansatz
@@ -111,7 +111,7 @@ class QTG(BlueprintCircuit):
 
     @property
     def num_sum_qubits(self) -> int:
-        return int(np.floor(np.log2(max(sum(self.weights), 1))) + 1)
+        return max(self._capacity.bit_length(), 1)
 
     @property
     def weights(self) -> List[int]:
@@ -231,7 +231,7 @@ class QTG(BlueprintCircuit):
         # --------------------------------------------------------------
         for i, w_i in enumerate(self.weights):
             q_state = qr_state[i]
-            cmp_val = self.capacity + 1 - w_i
+            cmp_val = self.capacity - w_i + 1
             cmp_gate = IntegerComparatorGate(n_sum, cmp_val, geq=False, label=f"cmp_{i}")
             qc.append(cmp_gate, qr_sum + [flag])
             bh = biased_hadamard(self.y_ansatz[i], self.biased)
