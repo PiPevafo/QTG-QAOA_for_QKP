@@ -1,25 +1,27 @@
+from __future__ import annotations
+
 """
 Module: constraint_mixer.py
 ---------------------------
-Constraint‑preserving mixers for **Qiskit’s** ``QAOAAnsatz`` based on
-Fuchs *et al.* (2022) *“Constraint preserving mixers for QAOA”* (arXiv:2203.06095).
+Constraint-preserving mixers for **Qiskit's** ``QAOAAnsatz`` based on
+Fuchs *et al.* (2022) *“Constraint preserving mixers for QAOA”* (arXiv:2203.06095).
 
-Given the list of feasible computational‑basis states *F* (bit‑strings of equal
-length *n*), the functions below construct a **Hermitian** operator
+Given the list of feasible computational-basis states *F* (bit-strings of equal
+length *n*), the functions below construct a **Hermitian** operator
 
-    Hₘ = ∑_{x,y∈F, x≠y} w(x,y) |x⟩⟨y| + h.c.
+    Hₘ = ∑_{x,y∈F, x≠y} w(x,y) |x⟩⟨y| + h.c.
 
 that generates a unitary mixer
 
-    Uₘ(β) = e^{‑iβ Hₘ},
+    Uₘ(β) = e^{-iβ Hₘ},
 
 satisfying the three QAOA requirements:
 
-1. *Preserves feasibility* – Uₘ acts non‑trivially **only** inside Span(F).
-2. *Connectivity* – From any |x⟩∈F one can reach any |y⟩∈F via powers of Uₘ.
-3. *[Uₘ, U_P]≠0* in general (left to the user via the cost operator).
+1. *Preserves feasibility* - Uₘ acts non-trivially **only** inside Span(F).
+2. *Connectivity* - From any |x⟩∈F one can reach any |y⟩∈F via powers of Uₘ.
+3. *[Uₘ, U_P]≠0* in general (left to the user via the cost operator).
 
-The simplest choice implemented here is the **complete‑graph mixer**
+The simplest choice implemented here is the **complete-graph mixer**
 (`strategy="complete"`), which connects every pair of feasible states.  Optionally
 `strategy="hamming1"` limits transitions to pairs that differ in exactly one
 bit (useful when all feasible strings share the same Hamming weight).
@@ -38,16 +40,13 @@ qaoa = QAOAAnsatz(cost_operator=cost_op,
                   initial_state=build_feasible_superposition_circuit(feasible_states))
 ```
 
-For **≤ 16 qubits** the dense‑matrix construction is typically fine (65 536 × 65 536
-complex entries ≈ 64 MiB).  For larger instances you should switch to the sparse
-backend provided below (`sparse=True`) or implement a problem‑specific Pauli
-expansion following Algorithms 2/3 in the cited paper.
+For **≤ 16 qubits** the dense-matrix construction is typically fine (65 536 x 65 536
+complex entries ≈ 64 MiB).  For larger instances you should switch to the sparse
+backend provided below (`sparse=True`) or implement a problem-specific Pauli
+expansion following Algorithms 2/3 in the cited paper.
 """
 
-from __future__ import annotations
-
-import math
-from typing import Iterable, List, Literal
+from typing import Iterable, List, Literal, Mapping
 
 import numpy as np
 from qiskit.quantum_info import Operator, SparsePauliOp, Pauli
@@ -61,29 +60,28 @@ __all__ = [
 # -----------------------------------------------------------------------------
 
 def _validate_feasible_states(feasible_states: Iterable[str]) -> List[str]:
+
     fs = list(feasible_states)
     if not fs:
         raise ValueError("feasible_states must not be empty")
     n = len(fs[0])
     for s in fs:
         if len(s) != n:
-            raise ValueError("All bit‑strings must have equal length")
+            raise ValueError("All bit-strings must have equal length")
         if set(s) - {"0", "1"}:
-            raise ValueError(f"Invalid bit‑string {s!r}")
+            raise ValueError(f"Invalid bit-string {s!r}")
     return fs
 
 
 def _hamming(a: str, b: str) -> int:
     return sum(sa != sb for sa, sb in zip(a, b))
 
-
 # -----------------------------------------------------------------------------
 # Public API
 # -----------------------------------------------------------------------------
 
 def build_constraint_mixer_operator(
-    feasible_states: Iterable[str],
-    *,
+    states_dict: Mapping[str, float] | None = None,
     strategy: Literal["complete", "hamming1"] = "complete",
     weight: float = 1.0,
     sparse: bool | None = None,
@@ -93,12 +91,12 @@ def build_constraint_mixer_operator(
     Parameters
     ----------
     feasible_states
-        Iterable of equal‑length bit‑strings defining the feasible subspace.
+        Iterable of equal-length bit-strings defining the feasible subspace.
     strategy
-        • ``"complete"`` (default) – connect **all** pairs x≠y.
-        • ``"hamming1"`` – connect only pairs with Hamming distance 1.
+        • ``"complete"`` (default) - connect **all** pairs x≠y.
+        • ``"hamming1"`` - connect only pairs with Hamming distance 1.
     weight
-        Positive real coefficient *w*; the Hamiltonian uses ±*w* on off‑diagonals.
+        Positive real coefficient *w*; the Hamiltonian uses ±*w* on off-diagonals.
     sparse
         If *None* (default) use a dense matrix for n≤16 qubits and sparse beyond.
         You may override explicitly with *True*/*False*.
@@ -106,8 +104,14 @@ def build_constraint_mixer_operator(
     Returns
     -------
     qiskit.quantum_info.Operator | qiskit.quantum_info.SparsePauliOp
-        Hermitian mixer HAMiltonian Hₘ.
+        Hermitian mixer Hamiltonian Hₘ.
     """
+
+    if states_dict is None or not states_dict:
+        raise ValueError("states_dict must not be empty")
+
+    feasible_states = [key for key, value in states_dict.items() if value > 0]
+    
     fs = _validate_feasible_states(feasible_states)
     n = len(fs[0])
     dim = 1 << n
@@ -141,4 +145,5 @@ def build_constraint_mixer_operator(
                     continue
                 H[a, b] = weight
                 H[b, a] = weight
+                
         return Operator(H)

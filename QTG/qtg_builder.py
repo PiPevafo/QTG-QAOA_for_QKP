@@ -1,13 +1,9 @@
-import numpy as np
-import math
-from typing import List, Optional
-from qiskit import QuantumCircuit, QuantumRegister, AncillaRegister
-from qiskit.circuit.library import IntegerComparatorGate, BlueprintCircuit, UnitaryGate
+from __future__ import annotations
 
 """
 Quantum Tree Generator (QTG) -state preparation circuit (without profit register)
 
-30-Jun-2025 (v2)
+30-Jun-2025 (v2) It works well
 -------------------------------------------------------------------------------
 This script builds, **in Qiskit**, the Quantum Tree Generator state |ψ_QTG⟩ for the
 0-1 Knapsack Problem exactly as described by Wilkening *et al.* (2024), **omitting**
@@ -42,11 +38,16 @@ Dependencies
 ------------
 $ pip install qiskit
 
-Copyright 2025 - released under the MIT Licence.
 """
 
+import numpy as np
+import math
+from typing import List, Optional
+from qiskit import QuantumCircuit, QuantumRegister, AncillaRegister
+from qiskit.circuit.library import IntegerComparatorGate, BlueprintCircuit, UnitaryGate
+
 ###############################################################################
-# Helper: biased Hadamard gate H_b^{(y_i)}                                   #
+# Helper: biased Hadamard gate H_b^{(y_i)}                                   
 ###############################################################################
 
 def biased_hadamard(y_bit: int, b: float) -> UnitaryGate:
@@ -67,9 +68,8 @@ def biased_hadamard(y_bit: int, b: float) -> UnitaryGate:
     return UnitaryGate(mat, label=f"H₍b={b:.2f}₎^{y_bit}")
 
 ###############################################################################
-# QTG builder                                                                 #
+# QTG builder                                                                 
 ###############################################################################
-
 
 class QTG(BlueprintCircuit):
     """Assemble the QTG circuit for a single-constraint (1-D) knapsack.
@@ -111,7 +111,7 @@ class QTG(BlueprintCircuit):
 
     @property
     def num_sum_qubits(self) -> int:
-        return max(self._capacity.bit_length(), 1)
+        return max(self._capacity.bit_length(), 1) # At most the items match the knapsack capacity
 
     @property
     def weights(self) -> List[int]:
@@ -231,7 +231,7 @@ class QTG(BlueprintCircuit):
         # --------------------------------------------------------------
         for i, w_i in enumerate(self.weights):
             q_state = qr_state[i]
-            cmp_val = self.capacity - w_i + 1
+            cmp_val = self.capacity - w_i + 1 # Makes the comparison: c_current ≤ C - w_i
             cmp_gate = IntegerComparatorGate(n_sum, cmp_val, geq=False, label=f"cmp_{i}")
             qc.append(cmp_gate, qr_sum + [flag])
             bh = biased_hadamard(self.y_ansatz[i], self.biased)
@@ -239,7 +239,7 @@ class QTG(BlueprintCircuit):
             qc.append(c_bh, [flag, q_state])  # apply biased Hadamard on x_i controlled by cmp flag
             qc.append(cmp_gate.inverse(), qr_sum + [flag])  # uncompute
 
-            # ---------- weighted adder (unchanged from original by Qiskit.IBM) ---------
+            # ---------- WeightedAdder (unchanged from original by Qiskit.IBM) ---------
             if w_i == 0:
                 continue
             wb = f"{w_i:b}".rjust(n_sum, "0")[::-1]

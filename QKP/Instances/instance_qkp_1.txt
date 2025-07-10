@@ -1,0 +1,17 @@
+TestInstance1
+7
+31 30 29 18 29 37 36
+13 7 24 32 15 27
+17 27 39 17 8
+30 12 40 31
+17 11 4
+13 3
+9
+
+1
+62
+9 9 12 3 7 8 15
+
+QTG-QAOA solution:
+Best Value:  461
+Best Solution: 1001111

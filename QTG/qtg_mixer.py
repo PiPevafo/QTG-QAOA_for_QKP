@@ -1,31 +1,26 @@
 from __future__ import annotations
 
-"""QTG‑based Grover mixer acting **only on the logical (item) qubits** (safe for transpiler).
+"""QTG-based Grover mixer acting. HAY QUE REVISAR
 
-**Key change 2025‑07‑04**  ▶  *The internal state‑preparation circuit is now fully
-**decomposed to basis gates** before being wrapped, which prevents the
-`AttributeError: 'Gate' object has no attribute 'value'` raised by the
-High‑Level‑Synthesis pass when it encounters library objects such as
-``IntegerComparator`` that were previously converted to a plain
-:class:`~qiskit.circuit.Gate`.*
-
+This is a brief implementation of the QTG-based Grover mixer as described in the paper
+by Paul Christiansen et al. The Quantum tree generator improves QAOA state-of-the-art for the knapsack problem.
+Based on the fact to know the feasible states of the knapsack problem |KP⟩, we can build a Grover mixer
+that preserves the feasible states and applies a phase shift into the feasible space.
+        
+            UM(β) |ψ⟩ = |ψ⟩ - (1 - e^(-iβ)) ⟨KP|ψ⟩ |KP⟩
+                   
 The public helper :func:`build_qtg_mixer` returns a parameterised
 :class:`~qiskit.circuit.QuantumCircuit` implementing
 
-.. math::
-
-    U_M(\beta)\;=\;G\,[e^{-\mathrm i\,2\beta\,|0\dots 0\rangle\langle0\dots 0|}\otimes\mathbb{I}]\,G^{\dagger},
-
+            UM(β) = G [ 1 - (1 - e^(iβ) ) |0 ... 0> <0 ... 0| ] G†,
+            
 where
 
-* ``G`` prepares the feasible‑space superposition via your
-  :class:`QTG <QTG.QTG>` class; it is **recursively decomposed** (`.decompose(recurse=True)`) so
+* G : prepares the feasible-space superposition via 
+  :class:`QTG : |KP>` class; it is **recursively decomposed** (`.decompose(recurse=True)`) so
   the final mixer contains only basis gates (`u`, `cx`, etc.) and safe
-  synth‑sized objects.  No library gate survives, so the transpiler no
-  longer tries to apply the faulty IntegerComparator synthesis plugin.
-* The phase operator acts **exclusivamente** sobre los *num_state_qubits*
-  (ítems); las ancillas de ``G`` se dejan invariantes.
-
+  synth-sized objects. 
+  
 Usage remains unchanged:
 
 ```python
@@ -52,7 +47,7 @@ def build_qtg_mixer(
     y_ansatz: Optional[Sequence[int]] = None,
     name: str = "QTG_Mixer",
 ) -> QuantumCircuit:
-    """Return a Grover‑type mixer acting only on the **state** qubits.
+    """Return a Grover-type mixer acting only on the **state** qubits.
 
     Parameters
     ----------
@@ -61,7 +56,7 @@ def build_qtg_mixer(
     weights, capacity
         Instance data forwarded to :class:`QTG <QTG.QTG>`.
     y_ansatz
-        Optional bitstring *y* to pre‑select items (defaults to all 0s).
+        Optional bitstring *y* to pre-select items (defaults to all 0s).
     name
         Name of the returned :class:`~qiskit.circuit.QuantumCircuit`.
     """
@@ -72,7 +67,7 @@ def build_qtg_mixer(
     if y_ansatz is None:
         y_ansatz = [0] * num_state_qubits
 
-    from qtg import QTG  # local import to avoid circular deps
+    from QTG.qtg_builder import QTG  # local import to avoid circular deps
 
     prep_raw = QTG(
         num_state_qubits=num_state_qubits,
@@ -86,37 +81,36 @@ def build_qtg_mixer(
 
     total_qubits = prep.num_qubits  # incluye ancillas
 
-    # Indices de los qubits *lógicos* (se asume que van primeros)
+    # Index of Logic qubits
     state_ids: Iterable[int] = range(num_state_qubits)
 
     # ------------------------------------------------------------------
-    # 2) Allocate mixer circuito
+    # 2) Allocate mixer circuit
     # ------------------------------------------------------------------
     mixer = QuantumCircuit(total_qubits, name=name)
 
     # ------------------------------------------------------------------
-    # 3) U_M = G · (I⊗R_sub) · G†  (R_sub actúa sólo en los qubits de estado)
+    # 3) U_M = G · (I⊗R_sub) · G†  (R_sub acts only in state qubits)
     # ------------------------------------------------------------------
     mixer.compose(prep, inplace=True)
 
     beta = Parameter("β")
 
     # Reflection about |0…0> on the *subsystem* only
-    #   a) X para mapear |0>→|1>
+    #   a) X map |0> → |1>
     mixer.x(list(state_ids))
 
-    #   b) Multi‑controlled phase cuando TODAS están en |1>
+    #   b) Multi‑controlled phase when  |1>
     if num_state_qubits == 1:
-        mixer.rz(-2 * beta, state_ids.start)  # type: ignore[attr-defined]
+        mixer.rz(-beta, state_ids.start)  # type: ignore[attr-defined]
     else:
         mcphase = MCPhaseGate(-beta, num_state_qubits - 1)
         mixer.append(mcphase, list(state_ids))
 
-    #   c) Deshacer las X
+    #   c) Undo X map |1> → |0>
     mixer.x(list(state_ids))
 
-    #   d) G†  (ya descompuesto)
+    #   d) G† 
     mixer.compose(prep.inverse(), inplace=True)
 
-    # Mantener parámetro simbólico en el circuito
     return mixer
