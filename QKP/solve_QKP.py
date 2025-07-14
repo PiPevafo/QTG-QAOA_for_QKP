@@ -1,10 +1,11 @@
 from QTG.qtg_builder import QTG
 from QTG.feasible_circuit import build_feasible_circuit
 from QKP.classical_solution import greedy_solution
-from QAOA.execute_simulation import extract_feasible_states, run_optimization, circuit_simulator
-from QAOA.qaoa import build_qaoa_circuit, build_qkp_cost_hamiltonian
-from QAOA.constraint_mixer import build_constraint_mixer_operator
+from QAOA.execute_simulation import run_optimization, circuit_simulator
+from QAOA.qaoa import build_qkp_cost_hamiltonian, operator_extend
+from QAOA.qtg_mixer import build_qtg_mixer
 from QKP.Instances.read_instances import read_instance
+from qiskit.circuit.library import QAOAAnsatz
 from qiskit import ClassicalRegister
 import numpy as np
 
@@ -32,36 +33,28 @@ def solve_QKP(filename, reps=1):
         biased=n/4, 
         capacity=capacity
     )
-    
-    feasible_states = extract_feasible_states(qtg_circuit, shots=1000)
-    qc_feasible = build_feasible_circuit(feasible_states, uniform=False)
-    
-    constraint_mixer = build_constraint_mixer_operator(
-        states_dict=feasible_states,
-        strategy="hamming1",
-        weight=1.0,
-        sparse=True
-    )
-    
-    
-    qaoa_circuit = build_qaoa_circuit(
-        n_items=n,
-        profits=profits,
-        initial_circuit=qc_feasible,
-        mixer=constraint_mixer,
-        reps=reps
-    )
-    
+
     cost_hamiltonian = build_qkp_cost_hamiltonian(n, profits)
+    cost_hamiltonian_ext = operator_extend(cost_hamiltonian, qtg_circuit.num_qubits)
+    
+    constraint_mixer =  build_qtg_mixer(qtg_circuit)
+    
+    qaoa_circuit = QAOAAnsatz(
+            cost_operator=cost_hamiltonian_ext,
+            mixer_operator=constraint_mixer.decompose().decompose(),
+            initial_state=qtg_circuit,
+            reps=reps,
+            name="QAOA_QKP"
+        )
     
     initial_gamma = np.pi
     initial_beta = np.pi/2
     init_params = [initial_gamma, initial_beta] * reps
     
     optimized_params = run_optimization(
-        qaoa_circuit=qaoa_circuit,
+        qaoa_circuit=qaoa_circuit.decompose().decompose(),
         init_params=init_params,
-        cost_hamiltonian=cost_hamiltonian,
+        cost_hamiltonian=cost_hamiltonian_ext,
         shots=1000
     )
 

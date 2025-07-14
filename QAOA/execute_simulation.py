@@ -52,31 +52,6 @@ def circuit_simulator(qc: QuantumCircuit, shots: int = 1024) -> dict[str, float]
     return {state: count / total_counts for state, count in counts.items()}
 
 
-def extract_feasible_states(qtg_circuit: QuantumCircuit, shots: int) -> dict[str, float]:
-    
-    """
-    Extracts feasible states from the QTG circuit by running it on a simulator.
-    Args:
-        qtg_circuit (QuantumCircuit): The QTG circuit to be executed.
-        shots (int): The number of shots to run the circuit.
-    Returns:
-        dict[str, float]: A dictionary with feasible states as keys and their probabilities as values.
-    """
-    
-    n_items = qtg_circuit.num_state_qubits
-    
-    reg = ClassicalRegister(n_items, 'reg')
-    qtg_circuit.add_register(reg)
-    qtg_circuit.measure(qtg_circuit.qubits[0:n_items], reg)
-
-    simulator = Aer.get_backend('aer_simulator')
-    transpiled_circuit = transpile(qtg_circuit, simulator) # Transpile the circuit for the simulator backend (Can be modified for specific backends)
-    
-    feasible_states = circuit_simulator(transpiled_circuit, shots)
-
-    return feasible_states
-
-
 def cost_func_estimator(params, ansatz, hamiltonian, estimator):
     """
     Computes the cost function for the QAOA circuit using an estimator.

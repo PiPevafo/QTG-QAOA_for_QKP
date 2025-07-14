@@ -20,7 +20,7 @@ if __name__ == "__main__":
         
         # Solve the QKP instance using QTG-QAOA approach
         start_time = time.time()
-        best_value, best_solution = solve_QKP(f"QKP/Instances/instance_qkp_{test}.txt", reps=15)
+        best_value, best_solution = solve_QKP(f"QKP/Instances/instance_qkp_{test}.txt", reps=5)
         end_time = time.time()
         print(f"Best Value using QTG-QAOA: {best_value}")
         print(f"Best Solution using QTG-QAOA: {best_solution[0]}")

@@ -11,7 +11,3 @@ TestInstance1
 1
 62
 9 9 12 3 7 8 15
-
-QTG-QAOA solution:
-Best Value:  461
-Best Solution: 1001111

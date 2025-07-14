@@ -64,29 +64,12 @@ def build_qkp_cost_hamiltonian(n_items, profits):
     return SparsePauliOp.from_list([(p, coeff) for p, coeff in pauli_dict.items() if abs(coeff) > 1e-8])
 
 
-def build_qaoa_circuit(n_items, profits, initial_circuit, mixer, reps):
-    """
-    Build the QAOA circuit for the QKP using the provided parameters and initial circuit.
-    
-    Args:
-        n_items (int): Number of items in the knapsack problem.
-        profits (list): Profit matrix for the knapsack problem (n_items x n_items).
-        initial_circuit (QuantumCircuit): Initial circuit to start with.
-        mixer (QuantumCircuit): Mixer circuit to be used in QAOA.
-        reps (int): Number of repetitions for the QAOA ansatz.
-
-    Returns:
-        QuantumCircuit: The complete QAOA circuit.
-    """
-
-    cost_hamiltonian = build_qkp_cost_hamiltonian(n_items, profits)
-    
-    qaoa = QAOAAnsatz(
-        cost_operator=cost_hamiltonian,
-        mixer_operator=mixer,
-        initial_state=initial_circuit,
-        reps=reps,
-        name="QAOA_QKP"
-    )
-    
-    return qaoa
+def operator_extend(op: SparsePauliOp, n_total: int) -> SparsePauliOp:
+    """Returns  op ⊗ I_(ancillas) to match Qubit - Count with the circuit."""
+    n_sys = op.num_qubits
+    ancillas = n_total - n_sys
+    if ancillas == 0:
+        return op
+    # Identity about 'ancillas' qubits 
+    id_anc = SparsePauliOp.from_list([("I" * ancillas, 1)])
+    return id_anc.tensor(op)  #  H  ⊗  I_anc
