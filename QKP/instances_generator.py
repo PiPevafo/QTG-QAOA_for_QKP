@@ -11,7 +11,7 @@ import random
 
 MSIZE = 400    # Maximum number of items
 
-def maketest(n, r, pct):
+def standard_instance(n, r, pct):
     """
     Generates an instance of the Quadratic Knapsack Problem (QKP).
 
@@ -90,7 +90,7 @@ def print_instance(instance, file, reference):
     file.write(f"{c}\n")
     file.write(" ".join(str(w) for w in weights) + "\n")
 
-def generate_and_save_instance(n, r, pct, test_id=1):
+def standard_instance_generator(n, r, pct, test_id=1):
     """
     Generates a QKP instance and saves it to a file named "instance_qkp_<test_id>.txt".
 
@@ -104,9 +104,11 @@ def generate_and_save_instance(n, r, pct, test_id=1):
         raise ValueError(f"Error: n exceeds maximum allowed size ({MSIZE})")
 
     random.seed(test_id + n + r + pct)  # seed for reproducibility
-    instance = maketest(n, r, pct)
-
-    filename = f"QKP\Instances\instance_qkp_{test_id}.txt"
+    instance = standard_instance(n, r, pct)
+    import os
+    folder_path = os.path.join("QKP", "Instances")
+    os.makedirs(folder_path, exist_ok=True)
+    filename = os.path.join(folder_path, f"instance_qkp_{test_id}.txt")
     with open(filename, "w") as out_file:
         reference = f"TestInstance{test_id}"
         print_instance(instance, out_file, reference)

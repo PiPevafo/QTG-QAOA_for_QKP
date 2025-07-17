@@ -67,6 +67,7 @@ def cost_func_estimator(params, ansatz, hamiltonian, estimator):
     job = estimator.run([circuit_bound], [hamiltonian])
     result = job.result()
     cost = result.values[0]
+    print(f"Cost function value: {cost}")
     return cost
 
 

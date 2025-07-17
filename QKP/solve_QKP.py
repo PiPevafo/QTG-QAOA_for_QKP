@@ -10,7 +10,7 @@ from qiskit import ClassicalRegister
 import numpy as np
 
 
-def solve_QKP(filename, reps=1):
+def solve_QKP(filename, reps=1, shots=1000):
     """
     Solves the Quadratic Knapsack Problem (QKP) using a QTG-QAOA hybrid approach.
 
@@ -55,14 +55,14 @@ def solve_QKP(filename, reps=1):
         qaoa_circuit=qaoa_circuit.decompose().decompose(),
         init_params=init_params,
         cost_hamiltonian=cost_hamiltonian_ext,
-        shots=1000
+        shots=shots
     )
 
     qc_optimized = qaoa_circuit.assign_parameters(optimized_params)
     reg = ClassicalRegister(n, 'reg')
     qc_optimized.add_register(reg)
     qc_optimized.measure(qc_optimized.qubits[0:n], reg)
-    state = circuit_simulator(qc_optimized, shots=1000)
+    state = circuit_simulator(qc_optimized.decompose().decompose(), shots=shots)
     state = {key[::-1]: val for key, val in state.items()} # Reverse keys to match qubit order
     
     bestsolution = max(state.items(), key=lambda kv: kv[1])

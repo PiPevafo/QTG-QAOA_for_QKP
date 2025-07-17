@@ -32,6 +32,42 @@ def greedy_solution(n_items, weights, profits, capacity):
 
     return greedy_ansatz
 
+import numpy as np
+
+def greedy_deletion_solution(n_items, weights, profits, capacity):
+    greedy_ansatz = [1] * n_items  # All items are initially in the knapsack
+    
+    total_weight = sum(weights[i] for i in range(n_items))
+    
+    def compute_objective(greedy_ansatz):
+        return sum(profits[i][j] * greedy_ansatz[i] * greedy_ansatz[j] for i in range(n_items) for j in range(n_items))
+
+    current_value = compute_objective(greedy_ansatz)
+    # As long as the solution is not feasible, eliminate items
+    
+    while total_weight > capacity:
+        delta_per_weight = []
+        for i in range(n_items):
+            if greedy_ansatz[i] == 1:
+                x_temp = greedy_ansatz.copy()
+                x_temp[i] = 0
+                new_value = compute_objective(x_temp)
+                delta = current_value - new_value
+                delta_per_weight.append((delta / weights[i], i))
+
+        # Sort items by δ_i/w_i from smallest to largest
+        delta_per_weight.sort()
+
+        # Remove the item with the smallest δ_i/w_i
+        _, idx_to_remove = delta_per_weight[0]
+        greedy_ansatz[idx_to_remove] = 0
+        total_weight -= weights[idx_to_remove]
+        current_value = compute_objective(greedy_ansatz)  
+
+    return greedy_ansatz  
+
+
+
 def solve_qkp_cplex(filename):
     """
     Solves the QKP using IBM CPLEX optimizer.
