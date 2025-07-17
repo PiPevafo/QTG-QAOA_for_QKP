@@ -29,7 +29,7 @@ def build_qtg_mixer(
         QuantumCircuit: circuit implemented by the mixer operator.  
     """
 
-    # Clonar los registros del QTG
+    # Clone QTG records
     qregs = qtg_circuit.qregs
     all_qubits = [q for qreg in qregs for q in qreg]
     qc_mixer = QuantumCircuit(*qregs, name="QTG_Mixer")
@@ -40,15 +40,15 @@ def build_qtg_mixer(
     # Paso 2: convertir |0> -> |1> en todos los qubits
     qc_mixer.x(all_qubits)
 
-    # Paso 3: aplicar una rotación de fase solo si todos los qubits están en |1>
-    # Esto implementa exp(-i beta |0><0|) en la base actual
+    # Step 3: Apply a phase rotation only if all qubits are in |1>
+    # This implements exp(-i beta |0><0|) in the current basis
     beta = Parameter("beta")
     qc_mixer.mcp(2 * beta, all_qubits[:-1], all_qubits[-1])
 
-    # Paso 4: revertir las X
+    # Step 4: Revert the X gates
     qc_mixer.x(all_qubits)
 
-    # Paso 5: volver a preparar el estado \ket{KP}
+    # Step 5: Prepare the state |KP⟩ again
     qc_mixer.append(qtg_circuit, all_qubits)
 
     return qc_mixer

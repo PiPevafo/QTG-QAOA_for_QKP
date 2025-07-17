@@ -70,6 +70,11 @@ def cost_func_estimator(params, ansatz, hamiltonian, estimator):
     print(f"Cost function value: {cost}")
     return cost
 
+def callback(xk):
+    callback.iteration += 1
+    print(f"Iteration {callback.iteration}: parameters = {xk}, \n")
+callback.iteration = 0
+
 
 def run_optimization(qaoa_circuit: QuantumCircuit, init_params: list[float], cost_hamiltonian: SparsePauliOp, shots: int) -> list[float]:
     """
@@ -91,8 +96,9 @@ def run_optimization(qaoa_circuit: QuantumCircuit, init_params: list[float], cos
         init_params,
         args=(qaoa_circuit, cost_hamiltonian, estimator),
         method="COBYLA", 
-        tol=1e-10,
-        options={'maxiter': 5000}
+        tol=1e-5,
+        callback=callback,
+        options={'maxiter': 100, 'disp': True}
     )
     if not result.success:
         raise RuntimeError(f"Optimization failed: {result.message}")
