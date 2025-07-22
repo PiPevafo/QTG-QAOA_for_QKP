@@ -1,0 +1,7 @@
+Experiment Summary
+Instance Type: densest
+Number of Items: 5
+Density (%): 50
+Number of Experiments: 10
+Average Gap: 3.33%
+Average QTG-QAOA Execution Time: 1.51 minutes

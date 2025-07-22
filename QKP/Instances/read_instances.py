@@ -38,7 +38,13 @@ def read_instance(filename):
             profits[i + 1 + j][i] = val  # fill symmetric entry
 
     # Capacity and weights
-    capacity = int(lines[-2])
-    weights = list(map(int, lines[-1].split()))
+
+    if lines[-2].startswith("Best Value"):
+        capacity = int(lines[-5])
+        weights = list(map(int, lines[-4].split()))
+    
+    else:    
+        capacity = int(lines[-2])
+        weights = list(map(int, lines[-1].split()))
 
     return n, profits, weights, capacity

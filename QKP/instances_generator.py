@@ -84,7 +84,7 @@ def print_instance(instance, file, reference):
     file.write(f"{c}\n")
     file.write(" ".join(str(w) for w in weights) + "\n")
 
-def instance_generator(n, r, pct, instance_type="standard", test_id=1):
+def instance_generator(n, r=0, pct=0, instance_type="standard", test_id=1):
     """
     Generates a QKP instance (standard or densest) and writes to file.
 
@@ -108,7 +108,7 @@ def instance_generator(n, r, pct, instance_type="standard", test_id=1):
     else:
         raise ValueError("instance_type must be either 'standard' or 'densest'")
 
-    folder_path = os.path.join("QKP", "Instances")
+    folder_path = os.path.join("QKP", "Instances", instance_type)
     os.makedirs(folder_path, exist_ok=True)
     filepath = os.path.join(folder_path, fname)
 

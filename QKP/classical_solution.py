@@ -101,9 +101,9 @@ def solve_qkp_cplex(filename):
     best_value = sum(profits[i][j] for i in range(n) for j in range(n) 
                      if bitstring[i] == '1' and bitstring[j] == '1')
 
-    # with open(filename, 'a') as f:
-    #     f.write("\nClassical solution (CPLEX):\n")
-    #     f.write(f"Best Value:  {best_value}\n")
-    #     f.write(f"Best Solution: {bitstring}\n")
+    with open(filename, 'a') as f:
+        f.write("\nClassical solution (CPLEX):\n")
+        f.write(f"Best Value:  {best_value}\n")
+        f.write(f"Best Solution: {bitstring}\n")
 
     return best_value, bitstring

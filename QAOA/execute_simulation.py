@@ -67,7 +67,7 @@ def cost_func_estimator(params, ansatz, hamiltonian, estimator):
     job = estimator.run([circuit_bound], [hamiltonian])
     result = job.result()
     cost = result.values[0]
-    print(f"Cost function value: {cost}")
+    # print(f"Cost function value: {cost}")
     return cost
 
 def callback(xk):
@@ -97,8 +97,8 @@ def run_optimization(qaoa_circuit: QuantumCircuit, init_params: list[float], cos
         args=(qaoa_circuit, cost_hamiltonian, estimator),
         method="COBYLA", 
         tol=1e-5,
-        callback=callback,
-        options={'maxiter': 100, 'disp': True}
+        #callback=callback,
+        options={'maxiter': 2000}
     )
     if not result.success:
         raise RuntimeError(f"Optimization failed: {result.message}")
