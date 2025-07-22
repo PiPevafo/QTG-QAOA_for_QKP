@@ -18,4 +18,4 @@ QTG-QAOA solution:
 Best Value:  6
 Best Solution: 00111
 
-QTG-QAOA execution time: 1.22 minutes
+QTG-QAOA execution time: 0.40 minutes

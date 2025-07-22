@@ -16,6 +16,6 @@ Best Solution: 01010
 
 QTG-QAOA solution:
 Best Value:  2
-Best Solution: 11000
+Best Solution: 01010
 
-QTG-QAOA execution time: 1.91 minutes
+QTG-QAOA execution time: 0.40 minutes

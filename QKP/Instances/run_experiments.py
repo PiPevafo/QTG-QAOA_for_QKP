@@ -6,7 +6,7 @@ from QKP.classical_solution import solve_qkp_cplex
 import os
 import time
 
-def run_multiple_experiments(n_items, pct, n_experiments, output_dir="QKP/Results", instance_type="densest"):
+def run_multiple_experiments(n_items, pct, n_experiments, instance_type, output_dir="QKP/Results"):
     os.makedirs(output_dir, exist_ok=True)
 
     total_gap = 0.0
@@ -23,7 +23,7 @@ def run_multiple_experiments(n_items, pct, n_experiments, output_dir="QKP/Result
 
         # Quantum solution using QTG-QAOA
         start_time = time.time()
-        quantum_value, quantum_solution = solve_QKP(instance_path, reps=5, shots=100)
+        quantum_value, quantum_solution = solve_QKP(instance_path, instance_type, reps=5, shots=100)
         end_time = time.time()
 
         execution_time = (end_time - start_time) / 60

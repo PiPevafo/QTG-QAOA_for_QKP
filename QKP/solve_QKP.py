@@ -5,12 +5,13 @@ from QAOA.execute_simulation import run_optimization, circuit_simulator
 from QAOA.qaoa import build_qkp_cost_hamiltonian, operator_extend
 from QAOA.qtg_mixer import build_qtg_mixer
 from QKP.Instances.read_instances import read_instance
+from QAOA.hamming_weight_mixer import build_hamming_weight_mixer
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit import ClassicalRegister
 import numpy as np
 
 
-def solve_QKP(filename, reps=1, shots=1000):
+def solve_QKP(filename, instance_type, reps=1, shots=1000):
     """
     Solves the Quadratic Knapsack Problem (QKP) using a QTG-QAOA hybrid approach.
 
@@ -26,6 +27,8 @@ def solve_QKP(filename, reps=1, shots=1000):
     n, profits, weights, capacity = read_instance(filename)
     greedy_ansatz = greedy_solution(n, weights, profits, capacity)
 
+    
+    
     qtg_circuit = QTG(
         num_state_qubits=n,
         weights=weights,
@@ -37,7 +40,10 @@ def solve_QKP(filename, reps=1, shots=1000):
     cost_hamiltonian = build_qkp_cost_hamiltonian(n, profits)
     cost_hamiltonian_ext = operator_extend(cost_hamiltonian, qtg_circuit.num_qubits)
     
-    constraint_mixer =  build_qtg_mixer(qtg_circuit)
+    if instance_type == "standard":
+        constraint_mixer =  build_qtg_mixer(qtg_circuit)
+    if instance_type == "densest":
+        constraint_mixer = build_hamming_weight_mixer(n_items=n, total_qubits=qtg_circuit.num_qubits, capacity=capacity)
     
     qaoa_circuit = QAOAAnsatz(
             cost_operator=cost_hamiltonian_ext,
