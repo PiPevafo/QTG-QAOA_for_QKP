@@ -8,6 +8,8 @@ Example Summary
 1
 2
 1 1 1 1
+
 Classical solution (CPLEX):
 Best Value:  20
 Best Solution: 1010
+

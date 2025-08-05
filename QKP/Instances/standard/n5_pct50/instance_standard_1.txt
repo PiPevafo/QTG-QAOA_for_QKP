@@ -1,0 +1,25 @@
+TestInstance_standard_1
+5
+0 13 0 48 12
+17 0 0 0
+28 0 46
+45 0
+0
+
+1
+47
+23 16 1 18 17
+
+Classical solution (CPLEX):
+Best Value:  207
+Best Solution: 01110
+
+QTG-QAOA solution:
+Best Value:  103
+Best Solution: 11100
+
+Greedy solution:
+Best Value:  207
+Best Solution: 01110
+
+QTG-QAOA execution time: 1.85 minutes

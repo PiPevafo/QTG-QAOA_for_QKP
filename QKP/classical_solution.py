@@ -32,8 +32,6 @@ def greedy_solution(n_items, weights, profits, capacity):
 
     return greedy_ansatz
 
-import numpy as np
-
 def greedy_deletion_solution(n_items, weights, profits, capacity):
     greedy_ansatz = [1] * n_items  # All items are initially in the knapsack
     
@@ -66,9 +64,7 @@ def greedy_deletion_solution(n_items, weights, profits, capacity):
 
     return greedy_ansatz  
 
-
-
-def solve_qkp_cplex(filename):
+def solve_qkp_cplex(filename, save_solution=True):
     """
     Solves the QKP using IBM CPLEX optimizer.
 
@@ -101,9 +97,10 @@ def solve_qkp_cplex(filename):
     best_value = sum(profits[i][j] for i in range(n) for j in range(n) 
                      if bitstring[i] == '1' and bitstring[j] == '1')
 
-    with open(filename, 'a') as f:
-        f.write("\nClassical solution (CPLEX):\n")
-        f.write(f"Best Value:  {best_value}\n")
-        f.write(f"Best Solution: {bitstring}\n")
+    if save_solution:
+        with open(filename, 'a') as f:
+            f.write("\nClassical solution (CPLEX):\n")
+            f.write(f"Best Value:  {best_value}\n")
+            f.write(f"Best Solution: {bitstring}\n")
 
-    return best_value, bitstring
+    return [best_value, bitstring]

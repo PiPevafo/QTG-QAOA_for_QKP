@@ -1,21 +1,26 @@
 TestInstance_densest_10
-5
-0 0 0 0 0
-1 1 0 1
-0 0 1
-0 0
+10
+0 0 0 0 0 0 0 0 0 0
+0 1 0 1 0 1 1 1 1
+1 1 1 1 1 1 1 1
+1 1 1 1 0 1 1
+1 1 1 1 1 0
+1 1 1 1 1
+1 1 1 0
+1 1 0
+1 1
 1
 
 1
-3
-1 1 1 1 1
+5
+1 1 1 1 1 1 1 1 1 1
 
 Classical solution (CPLEX):
-Best Value:  6
-Best Solution: 11001
+Best Value:  20
+Best Solution: 0100111010
 
 QTG-QAOA solution:
-Best Value:  4
-Best Solution: 11100
+Best Value:  18
+Best Solution: 1000011110
 
-QTG-QAOA execution time: 0.42 minutes
+QTG-QAOA execution time: 6.13 minutes

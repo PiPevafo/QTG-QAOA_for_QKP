@@ -52,7 +52,7 @@ def circuit_simulator(qc: QuantumCircuit, shots: int = 1024) -> dict[str, float]
     return {state: count / total_counts for state, count in counts.items()}
 
 
-def cost_func_estimator(params, ansatz, hamiltonian, estimator):
+def cost_func_estimator(params, ansatz, hamiltonian, estimator, objective_func_vals=None):
     """
     Computes the cost function for the QAOA circuit using an estimator.
     Args:
@@ -67,16 +67,18 @@ def cost_func_estimator(params, ansatz, hamiltonian, estimator):
     job = estimator.run([circuit_bound], [hamiltonian])
     result = job.result()
     cost = result.values[0]
+
+    if objective_func_vals is not None:
+        objective_func_vals.append(cost)
     # print(f"Cost function value: {cost}")
     return cost
 
 def callback(xk):
     callback.iteration += 1
     print(f"Iteration {callback.iteration}: parameters = {xk}, \n")
-callback.iteration = 0
-
-
-def run_optimization(qaoa_circuit: QuantumCircuit, init_params: list[float], cost_hamiltonian: SparsePauliOp, shots: int) -> list[float]:
+    
+def run_optimization(qaoa_circuit: QuantumCircuit, init_params: list[float], cost_hamiltonian: SparsePauliOp, 
+                     shots: int, tol=1e-5, iterations=2000, convergence=False, callback_bool=False):
     """
     Runs the QAOA circuit on a simulator and extracts feasible states.
     
@@ -87,20 +89,29 @@ def run_optimization(qaoa_circuit: QuantumCircuit, init_params: list[float], cos
     Returns:
         list[float]: The optimized parameters for the QAOA circuit.
     """
-
     estimator = AerEstimator()
     estimator.set_options(shots=shots)
 
+    if callback_bool:
+        callback.iteration = 0
+        minimize_callback = callback
+    else:
+        minimize_callback = None
+    if convergence:
+        objective_func_vals = []
+    else:
+        objective_func_vals = None
+        
     result = minimize(
         cost_func_estimator,
         init_params,
-        args=(qaoa_circuit, cost_hamiltonian, estimator),
+        args=(qaoa_circuit, cost_hamiltonian, estimator, objective_func_vals),
         method="COBYLA", 
-        tol=1e-5,
-        #callback=callback,
-        options={'maxiter': 2000}
+        tol=tol,
+        callback=minimize_callback,
+        options={'maxiter': iterations}
     )
     if not result.success:
         raise RuntimeError(f"Optimization failed: {result.message}")
  
-    return result.x
+    return result.x, objective_func_vals if convergence else None

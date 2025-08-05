@@ -34,9 +34,9 @@ def standard_instance(n, r, pct):
                 p[i][j] = p[j][i] = val
 
     wsum = sum(w)
-    if wsum - 50 <= 0:
-        raise Exception("Total weight too small to generate capacity.")
-    c = random.randint(50, wsum - 1)
+    while wsum <= 30:
+        wsum += random.randint(1, max(w))
+    c = random.randint(30, wsum - 1)
 
     return {'n': n, 'p': p, 'w': w, 'c': c}
 
@@ -101,7 +101,7 @@ def instance_generator(n, r=0, pct=0, instance_type="standard", test_id=1):
     random.seed(test_id + n + r + pct)
     if instance_type == "standard":
         instance = standard_instance(n, r, pct)
-        fname = f"instance_qkp_{test_id}.txt"
+        fname = f"instance_standard_{test_id}.txt"
     elif instance_type == "densest":
         instance = densest_instance(n, pct)
         fname = f"instance_densest_{test_id}.txt"
@@ -109,7 +109,9 @@ def instance_generator(n, r=0, pct=0, instance_type="standard", test_id=1):
         raise ValueError("instance_type must be either 'standard' or 'densest'")
 
     folder_path = os.path.join("QKP", "Instances", instance_type)
-    os.makedirs(folder_path, exist_ok=True)
+    subfolder_path = os.path.join(folder_path, f"n{n}_pct{pct}")
+    os.makedirs(subfolder_path, exist_ok=True)
+    folder_path = subfolder_path
     filepath = os.path.join(folder_path, fname)
 
     with open(filepath, "w") as out_file:
