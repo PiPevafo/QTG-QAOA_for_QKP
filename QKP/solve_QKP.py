@@ -53,7 +53,7 @@ def solve_QKP(filename, instance_type, reps=3, shots=100, tol=1e-5,
     
     qaoa_circuit = QAOAAnsatz(
             cost_operator=cost_hamiltonian_ext,
-            mixer_operator=constraint_mixer.decompose().decompose(),
+            mixer_operator=constraint_mixer.decompose(reps=2),
             initial_state=qtg_circuit,
             reps=reps,
             name="QAOA_QKP"
@@ -64,7 +64,7 @@ def solve_QKP(filename, instance_type, reps=3, shots=100, tol=1e-5,
     init_params = [initial_gamma, initial_beta] * reps
     
     optimized_params, objective_func_vals = run_optimization(
-        qaoa_circuit=qaoa_circuit.decompose().decompose(),
+        qaoa_circuit=qaoa_circuit.decompose(reps=2),
         init_params=init_params,
         cost_hamiltonian=cost_hamiltonian_ext,
         shots=shots,
@@ -78,7 +78,7 @@ def solve_QKP(filename, instance_type, reps=3, shots=100, tol=1e-5,
     reg = ClassicalRegister(n, 'reg')
     qc_optimized.add_register(reg)
     qc_optimized.measure(qc_optimized.qubits[0:n], reg)
-    state = circuit_simulator(qc_optimized.decompose().decompose(), shots=shots)
+    state = circuit_simulator(qc_optimized.decompose(reps=2), shots=shots)
     state = {key[::-1]: val for key, val in state.items()} # Reverse keys to match qubit order
     
     bestsolution = max(state.items(), key=lambda kv: kv[1])

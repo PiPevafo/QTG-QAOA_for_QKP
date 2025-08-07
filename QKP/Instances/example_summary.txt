@@ -13,3 +13,7 @@ Classical solution (CPLEX):
 Best Value:  20
 Best Solution: 1010
 
+
+Classical solution (CPLEX):
+Best Value:  20
+Best Solution: 1010

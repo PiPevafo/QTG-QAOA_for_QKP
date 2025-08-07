@@ -23,8 +23,8 @@ def run_multiple_experiments(n_items, r, pct, n_experiments, instance_type):
 
         # Quantum solution using QTG-QAOA
         start_time = time.time()
-        quantum_solution, greedy_ansatz, objective_func_vals = solve_QKP(instance_path, instance_type, reps=1, shots=10,
-                                        tol=1e-10, iterations=5000, biased=1/2, convergence=False, callback_bool=True)
+        quantum_solution, greedy_ansatz, objective_func_vals = solve_QKP(instance_path, instance_type, reps=5, shots=1000,
+                                        tol=1e-5, iterations=300, biased=1/2, convergence=False, callback_bool=True)
         end_time = time.time()
 
         execution_time = (end_time - start_time) / 60

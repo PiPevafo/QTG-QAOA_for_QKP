@@ -1,0 +1,8 @@
+Experiment Summary
+Instance Type: standard
+Number of Items: 5
+Density (%): 100
+Number of Experiments: 20
+Average CPLEX Gap: 9.87%
+Average Greedy Gap: 4.89%
+Average QTG-QAOA Execution Time: 19.52 minutes

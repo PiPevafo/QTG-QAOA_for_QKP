@@ -37,11 +37,12 @@ from qiskit_aer.primitives import Estimator as AerEstimator
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import Aer
 
+
 def circuit_simulator(qc: QuantumCircuit, shots: int = 1024) -> dict[str, float]:
-    
-    simulator = Aer.get_backend('aer_simulator')
-    transpiled_circuit = transpile(qc, simulator)
-    job = simulator.run(transpiled_circuit, shots=shots)
+
+    backend = Aer.get_backend('aer_simulator')
+    transpiled_circuit = transpile(qc, backend)
+    job = backend.run(transpiled_circuit, shots=shots)
     result = job.result()
     counts = result.get_counts()
     total_counts = sum(counts.values())

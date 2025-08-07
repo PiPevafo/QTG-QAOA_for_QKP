@@ -15,11 +15,11 @@ Best Value:  104
 Best Solution: 10110
 
 QTG-QAOA solution:
-Best Value:  78
-Best Solution: 00110
+Best Value:  104
+Best Solution: 10110
 
 Greedy solution:
 Best Value:  104
 Best Solution: 10110
 
-QTG-QAOA execution time: 7.53 minutes
+QTG-QAOA execution time: 11.87 minutes

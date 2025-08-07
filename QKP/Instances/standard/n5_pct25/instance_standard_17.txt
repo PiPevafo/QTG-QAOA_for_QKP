@@ -22,4 +22,4 @@ Greedy solution:
 Best Value:  107
 Best Solution: 11011
 
-QTG-QAOA execution time: 8.52 minutes
+QTG-QAOA execution time: 12.69 minutes
