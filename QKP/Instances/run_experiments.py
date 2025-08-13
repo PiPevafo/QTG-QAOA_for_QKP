@@ -3,10 +3,9 @@ import time
 from QKP.instances_generator import instance_generator
 from QKP.solve_QKP import solve_QKP
 from QKP.classical_solution import solve_qkp_cplex
-import os
-import time
+import numpy as np
 
-def run_multiple_experiments(n_items, r, pct, n_experiments, instance_type):
+def run_multiple_experiments(n_items, r, pct, n_experiments, instance_type, layers=5, shots=1000):
 
     total_gap_cplex = 0.0
     total_gap_greedy = 0.0
@@ -23,8 +22,8 @@ def run_multiple_experiments(n_items, r, pct, n_experiments, instance_type):
 
         # Quantum solution using QTG-QAOA
         start_time = time.time()
-        quantum_solution, greedy_ansatz, objective_func_vals = solve_QKP(instance_path, instance_type, reps=5, shots=1000,
-                                        tol=1e-5, iterations=300, biased=1/2, convergence=False, callback_bool=True)
+        quantum_solution, greedy_ansatz, objective_func_vals = solve_QKP(instance_path, instance_type, reps=layers, shots=shots,
+                                        tol=1e-5, iterations=100, biased=1/2, convergence=False, callback_bool=True)
         end_time = time.time()
 
         execution_time = (end_time - start_time) / 60
@@ -34,12 +33,12 @@ def run_multiple_experiments(n_items, r, pct, n_experiments, instance_type):
         if classical_solution[0] == 0:
             gap_cplex = 0.0
         else:
-            gap_cplex = ((classical_solution[0] - quantum_solution[0]) / classical_solution[0]) * 100
+            gap_cplex = ((classical_solution[0] - quantum_solution[0]) / np.abs(classical_solution[0])) * 100
 
         if greedy_ansatz[0] == 0:
             gap_greedy = 0.0
         else:
-            gap_greedy = ((greedy_ansatz[0] - quantum_solution[0]) / greedy_ansatz[0]) * 100
+            gap_greedy = ((greedy_ansatz[0] - quantum_solution[0]) / np.abs(greedy_ansatz[0])) * 100
 
         total_gap_cplex += gap_cplex
         total_gap_greedy += gap_greedy

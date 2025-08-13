@@ -1,5 +1,6 @@
 import random
 import os
+from typing import Dict, List
 
 # ================================================================
 # Module: instances_generator.py
@@ -40,31 +41,41 @@ def standard_instance(n, r, pct):
 
     return {'n': n, 'p': p, 'w': w, 'c': c}
 
-def densest_instance(n, density_pct):
-    """
-    Generates an instance of the Densest k-Subgraph problem formatted as a QKP.
 
-    Parameters:
-        n           : number of nodes (items)
-        density_pct : probability (0-100) of an edge (profit entry) existing
-
-    Returns:
-        dict: instance with fields 'n', 'p', 'w', 'c'
-    """
+def densest_instance(n: int, r: int, density_pct: float):
     if n < 2:
         raise ValueError("n must be at least 2.")
 
-    Q = [[0] * n for _ in range(n)]
-    prob = density_pct / 100.0
+    prob = max(0.0, min(100.0, density_pct)) / 100.0 
 
-    for i in range(n):
-        for j in range(i + 1, n):
-            if random.random() < prob:
-                Q[i][j] = Q[j][i] = 1
+    while True:
+        Q: List[List[int]] = [[0 for _ in range(n)] for _ in range(n)]
 
-    w = [1] * n
-    q = 2 if n <= 3 else random.randint(2, n - 2)
-    return {'n': n, 'p': Q, 'w': w, 'c': q}
+        for i in range(n):
+            for j in range(i + 1, n):
+                if random.random() < prob:
+                    w_ij = int(round(r * random.gauss(0.0, 1.0)))
+                    if w_ij == 0:
+                        w_ij = 1 if random.random() < 0.5 else -1
+                    Q[i][j] = Q[j][i] = w_ij
+
+        has_pos = any(Q[i][j] > 0 for i in range(n) for j in range(i + 1, n))
+        has_neg = any(Q[i][j] < 0 for i in range(n) for j in range(i + 1, n))
+        all_zero = all(Q[i][j] == 0 for i in range(n) for j in range(n))
+
+        if not all_zero:  # ensure not all entries are zero
+            if not (has_pos and has_neg):
+                edges = [(abs(Q[i][j]), i, j) for i in range(n) for j in range(i + 1, n) if Q[i][j] != 0]
+                if edges:
+                    edges.sort()
+                    _, i, j = edges[0]
+                    Q[i][j] = Q[j][i] = -Q[i][j]
+            break  # exit loop only when valid instance is generated
+
+    w: List[int] = [1] * n
+    c = 2 if n <= 3 else random.randint(2, n - 2)
+    return {"n": n, "p": Q, "w": w, "c": c}
+
 
 def print_instance(instance, file, reference):
     """
@@ -103,7 +114,7 @@ def instance_generator(n, r=0, pct=0, instance_type="standard", test_id=1):
         instance = standard_instance(n, r, pct)
         fname = f"instance_standard_{test_id}.txt"
     elif instance_type == "densest":
-        instance = densest_instance(n, pct)
+        instance = densest_instance(n, r, pct)
         fname = f"instance_densest_{test_id}.txt"
     else:
         raise ValueError("instance_type must be either 'standard' or 'densest'")
