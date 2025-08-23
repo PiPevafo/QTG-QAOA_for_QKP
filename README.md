@@ -90,7 +90,8 @@ The notebook `summary.ipynb` includes:
 
 ## Author
 
-Developed by **Andres Valencia**, Physics undergraduate student, as part of a research project on quantum algorithms for combinatorial optimization at GERAD UQAM.
+Developed by **Andres Valencia**, Physics undergraduate student, as part of a research project on quantum algorithms for combinatorial optimization at GERAD UQAM. 
+[Quantum_Quadratic_Knapsack_Problem.pdf](https://github.com/user-attachments/files/21952713/Quantum_Quadratic_Knapsack_Problem.pdf)
 
 ---
 
