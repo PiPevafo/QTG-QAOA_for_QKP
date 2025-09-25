@@ -1,6 +1,6 @@
 # QTG-QAOA for QKP
 
-This repository implements a quantum algorithm for solving the **Quadratic Knapsack Problem (QKP)** using the **Quantum Approximate Optimization Algorithm (QAOA)**. The approach introduces a novel **Quantum Tree Generator (QTG)** as the initial state to guide the optimization process more effectively.
+This repository implements a quantum algorithm for solving the **Quadratic Knapsack Problem (QKP)** using the **Quantum Approximate Optimization Algorithm (QAOA)**. The approach introduces a novel **Quantum Tree Generator (QTG)** as the initial state to guide the optimization process more effectively. You can find the complete work at [this link](http://dx.doi.org/10.13140/RG.2.2.21270.61764).
 
 ---
 
